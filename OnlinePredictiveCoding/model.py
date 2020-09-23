@@ -1,52 +1,65 @@
-import torch
 import numpy as np
 import pandas as pd
-import torch.nn as nn
-import torch.functional as F
-from torch.autograd  import Variable
-import torch.optim as optim
 
 
-class error_module(nn.Module):
-    def __init__(self,size):
-        super(error_module,self).__init__()
-        self.error_linear = nn.Linear(size,1)
-        self.Var_e = Variable(torch.ones(1, 1), requires_grad=True)
-    def forward(self,x,prev_error):
-        x = self.error_linear(x) + self.Var_e * prev_error
+class error_module:
+    def __init__(self, size, lr):
+        self.size = size
+        self.w = np.zeros(size)
+        self.lr = lr
 
-        return x
+    def predict(self, x):
+        return np.dot(self.w, x)
 
+    def update(self, x, y):
+        yhat = self.predict(x)  # regression
+        loss = 0.5 * (y - yhat)**2
+        self.w += self.lr * (y - yhat)
+        return loss
 
-
-class classifier_module(nn.Module):
-    def __init__(self,size):
-        super(classifier_module,self).__init__()
-        self.classifier_linear = nn.Linear(size,1)
-        self.Var_w = Variable(torch.ones(1, 1), requires_grad=True)
-    def forward(self,x, prev_error):
-        x = self.classifier_linear(x) + self.Var_w * prev_error
-
-        return x
+    def reset(self):
+        self.w = np.zeros(self.size)
 
 
-class OPNet(nn.Module):
-    def __init__(self,number_layers,size):
-        super(OPNet,self).__init__()
-        self.classifier_module = classifier_module(size)
-        self.number_layers = number_layers
-        self.error_modules = nn.ModuleList([error_module(size) for i in range(number_layers-1)])
 
-    def forward(self,x):
-        predict= torch.zeros(1, 1).double()
-        errors = []
-        errors.append(torch.zeros(1, 1).double())
-        for i in range (self.number_layers - 1):
-            predict = self.error_modules[i](x[i], predict)
-            errors.append(predict - errors[-1])
+class classifier_module:
+    def __init__(self, size, lr):
+        self.size = size
+        self.w = np.zeros(size)
+        self.lr = lr
+
+    def predict(self, x):
+        return np.dot(self.w, x)
+
+    def update(self, x, y):
+        loss = np.maximum(0, 1.0 - y * np.dot(self.w, x))
+        if loss > 0: self.w += x * y * self.lr
+        return loss
+
+    def reset(self):
+        self.w = np.zeros(self.size)
 
 
-        pred = self.classifier_module(x[-1], predict)
-        errors.append(pred - errors[-1])
 
-        return pred, errors
+class oco_classifier:
+    def __init__(self, size, C):
+        self.size = size
+        self.w = np.zeros(size)
+        self.C = C
+
+    def predict(self, x):
+        return np.dot(self.w, x)
+
+    def update(self, x, y):
+        loss = np.maximum(0, 1.0 - y * np.dot(self.w, x))
+        if loss > 0:
+            self.w += np.minimum(self.C, loss/(np.square(np.linalg.norm(x))+ 1e-6)) * x * y
+        return loss
+
+    def reset(self):
+        self.w = np.zeros(self.size)
+
+
+class online_predictive_coding:
+    def __init__(self, size, lr):
+        

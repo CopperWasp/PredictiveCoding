@@ -1,3 +1,9 @@
+import pandas as pd
+import numpy as np
+
+
+root_path, extension = "./datasets/", "_numeric"
+
 def get_path(name):
     '''returns a path pair to the preprocessed datasets
     X and y csv files.'''
@@ -18,6 +24,7 @@ def simulate_varying(X):  # multivariate normal distribution
     Possible concerns: thresholding messing up the distribution?'''
 
     # create a covariance matrix
+    num_features = len(X[0])
     cov = np.random.rand(num_features, num_features)
     cov = np.dot(cov, cov.transpose())  # to have a positive semi-definite matrix
 
@@ -36,6 +43,10 @@ def simulate_varying(X):  # multivariate normal distribution
 def simulate_random_varying(X): # discrete uniform distribution
     matrix = np.random.randint(2, size=(len(X), len(X[0])))
     return matrix
+
+
+def simulate_nothing(X):
+    return np.ones_like(X)
 
 
 def quant(x, l):  # l: num_layers, x:input
