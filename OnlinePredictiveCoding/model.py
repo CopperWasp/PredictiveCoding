@@ -68,7 +68,7 @@ class oco_classifier:
     def update(self, x, y):
         loss = np.maximum(0, 1.0 - y * np.dot(self.w, x))
         if loss > 0:
-            self.w += np.minimum(self.C, loss/(np.square(np.linalg.norm(x))+1e-6)) * x * y
+            self.w += np.minimum(self.C, loss/np.square(np.linalg.norm(x)+1e-5)) * x * y
         return loss
 
     def reset(self):

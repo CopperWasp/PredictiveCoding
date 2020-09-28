@@ -4,7 +4,7 @@ import model
 random_state = 1
 dataset_name = 'german'
 folds = 20
-learning_rate = 0.001
+learning_rate = 0.01
 scenario = 'varying_gaussian'
 model_type = 'opc'
 num_layers = 3
@@ -15,7 +15,7 @@ scenarios = {'full': dl.simulate_nothing,
 
 
 
-datasets = ['german', 'ionosphere', 'spambase', 'magic04']
+datasets = ['a8a', 'german', 'ionosphere', 'spambase', 'magic04']
 
 models = {
     'hinge_gradient': model.classifier_module,
