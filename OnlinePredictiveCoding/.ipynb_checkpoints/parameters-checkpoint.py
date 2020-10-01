@@ -8,6 +8,7 @@ learning_rate = 0.01
 scenario = 'varying_gaussian'
 model_type = 'opc'
 num_layers = 3
+cov_strength = 0.5
 
 scenarios = {'full': dl.simulate_nothing,
              'varying_gaussian': dl.simulate_varying,
