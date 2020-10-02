@@ -1,6 +1,7 @@
 from sklearn.utils import shuffle
 import copy
 import parameters as p
+import torch
 import numpy as np
 
 def train(X, y, model):
@@ -13,6 +14,9 @@ def train(X, y, model):
         predictions.append(yhat)
         losses.append(loss)
 
+        if torch.is_tensor(yhat):
+            yhat = yhat.detach().numpy()
+        
         if np.sign(yhat) != y[i]:
             error_count += 1
 

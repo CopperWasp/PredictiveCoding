@@ -1,6 +1,11 @@
 import numpy as np
 import pandas as pd
+from torch import nn
 import copy
+import torch.optim as optim
+import torch
+from torch.autograd  import Variable
+
 
 num_layers = 3
 
@@ -99,8 +104,6 @@ class opc:
         return yhat_list
             
         
-    
-    
     def update(self, x, y):
         loss_list = np.zeros(self.num_layers)
         yhat_list = self.predict(x, return_sum=False)
@@ -125,3 +128,152 @@ class opc:
         self.w = []
         for i in range(self.num_layers): # top-down
             self.w.append(np.zeros(self.in_size))
+            
+            
+class opc_backprop(nn.Module):
+    def __init__(self, in_size, lr):
+        super(opc_backprop, self).__init__()
+        
+        self.lr = lr
+        self.in_size = in_size
+        self.num_layers = num_layers
+        self.w = nn.ModuleList([])       
+        for i in range(num_layers):
+            self.w.append(nn.Linear(in_size, 1, bias=True))  # these biases are extremely important for the performance
+        
+        self.optimizer = optim.SGD(self.parameters(), lr=self.lr)
+
+ 
+    def predict(self, x, return_sum=True):
+        return self.forward(x)
+  
+            
+    def forward(self, x):
+        X_list, out = quant(x, self.num_layers), 0
+        
+        for i in range(len(X_list)):
+            x_current = torch.FloatTensor(X_list[i])
+            out += self.w[i](x_current)
+        
+        return out
+        
+    
+    def update(self, x, y):
+        self.optimizer.zero_grad()
+        output = self.predict(x)
+        
+        if np.sign(output.detach().numpy()) == y:
+            return 0
+        
+        loss = self.criterion(output, torch.FloatTensor([y]))    
+        loss.backward()
+        self.optimizer.step()
+        return loss
+        
+        
+    def reset(self):
+        self.w = nn.ModuleList([])
+        for i in range(self.num_layers):
+            self.w.append(nn.Linear(self.in_size, 1))
+            
+
+    def criterion(self, y, yhat):
+        zero = torch.Tensor([0])
+        return torch.sum(torch.max(zero, 1.0 - y * yhat))
+            
+            
+            
+        
+        
+        
+############# Jeev's implementation ################
+class error_module(nn.Module):
+    def __init__(self,size):
+        super(error_module,self).__init__()
+        self.error_linear = nn.Linear(size,1, bias=False)
+        self.Var_e = Variable(torch.ones(1, 1), requires_grad=True)
+    def forward(self,x,prev_error):
+        x = self.error_linear(x) + self.Var_e * prev_error
+        
+        return x
+
+
+
+class classifier_module(nn.Module):
+    def __init__(self,size):
+        super(classifier_module,self).__init__()
+        self.classifier_linear = nn.Linear(size,1, bias=False)
+        self.Var_w = Variable(torch.ones(1, 1), requires_grad=True)
+    def forward(self,x, prev_error):
+        x = self.classifier_linear(x) +  self.Var_w * prev_error 
+        
+        return x
+    
+
+class MyHingeLoss(torch.nn.Module):
+
+    def __init__(self):
+        super(MyHingeLoss, self).__init__()
+
+    def forward(self, output, target):
+
+        hinge_loss = 1 - torch.mul(output, target)
+        hinge_loss[hinge_loss < 0] = 0
+        return hinge_loss
+        
+
+class OPNet(nn.Module):
+    def __init__(self,number_layers,size):
+        super(OPNet,self).__init__()
+        self.classifier_module = classifier_module(size)
+        self.number_layers = number_layers
+        self.error_modules = nn.ModuleList([error_module(size) for i in range(number_layers-1)])
+            
+    def forward(self,x):
+        predict= torch.zeros(1, 1).double()
+        errors = []
+        errors.append(torch.zeros(1, 1).double())
+        for i in range (self.number_layers - 1):
+            predict = self.error_modules[i](x[i], predict) 
+            errors.append(torch.norm(predict - errors[-1]))
+        
+            
+        pred = self.classifier_module(x[-1], predict) 
+        errors.append(torch.norm(pred - errors[-1]))
+        
+        return pred, errors
+
+class opcbackprop:
+    def __init__(self,in_size,lr):
+        self.in_size = in_size
+        self.number_layers = num_layers
+        self.lr = lr
+        self.model = OPNet(num_layers,in_size).to(torch.double)
+        self.criterion = MyHingeLoss()
+        self.optim = optim.SGD(self.model.parameters(), lr=lr)
+        self.w = -1
+        
+    def predict(self, x, return_sum = True, detach=True):
+        x_list = quant(x, self.number_layers)
+        x_tensor = torch.from_numpy(np.array(x_list))
+        yhat = self.model(x_tensor)
+        if detach:
+            return yhat[0].detach()
+        else:
+            return yhat[0]
+             
+    def update(self,x,y):
+        y = torch.from_numpy(y.reshape(1,1))
+        pred = self.predict(x, detach=False)
+        loss = self.criterion(pred,y)
+        if torch.sign(pred).detach().numpy()[0][0]!= y:
+            loss.backward()
+            self.optim.step()
+            
+        return loss
+            
+    def reset(self):
+        self.model = OPNet(num_layers,self.in_size).to(torch.double)
+        self.optim = optim.SGD(self.model.parameters(), lr=self.lr)
+
+    
