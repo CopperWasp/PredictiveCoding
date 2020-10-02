@@ -22,4 +22,5 @@ models = {
     'hinge_gradient': model.classifier_module,
     'se_gradient': model.error_module,
     'hinge_oco': model.oco_classifier,
-    'opc': model.opc}
+    'opc': model.opc,
+    'opcbackprop':model.opcbackprop}

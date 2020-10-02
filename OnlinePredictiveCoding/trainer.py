@@ -11,8 +11,10 @@ def train(X, y, model):
         yhat = model.predict(X[i])
         loss = model.update(X[i], y[i])
         predictions.append(yhat)
+        #print(type(loss))
+        
         losses.append(loss)
-
+        
         if np.sign(yhat) != y[i]:
             error_count += 1
 
@@ -36,7 +38,8 @@ def cross_validation(X, y, model, num_folds, scenario_function):
 
         losses, predictions, error_rate, weights = train(X_copy, y, model)
         #print(error_rate)
-
+        #print(np.mean(losses))
+        #print('fold: {}'.format(i))
         fold_errors.append(error_rate)
         fold_losses.append(losses)
         fold_weights.append(weights)
