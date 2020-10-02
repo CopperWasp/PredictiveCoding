@@ -142,10 +142,11 @@ class opc:
 class error_module(nn.Module):
     def __init__(self,size):
         super(error_module,self).__init__()
-        self.error_linear = nn.Linear(size,1)
+        self.error_linear = nn.Linear(size,1,bias=True)
+        torch.nn.init.zeros_(self.error_linear.weight)
         self.Var_e = Variable(torch.ones(1, 1), requires_grad=True)
     def forward(self,x,prev_error):
-        x = self.error_linear(x) + self.Var_e * prev_error
+        x = self.error_linear(x) + self.Var_e* prev_error
         
         return x
 
@@ -154,10 +155,11 @@ class error_module(nn.Module):
 class classifier_module(nn.Module):
     def __init__(self,size):
         super(classifier_module,self).__init__()
-        self.classifier_linear = nn.Linear(size,1)
+        self.classifier_linear = nn.Linear(size,1,bias=True)
+        torch.nn.init.zeros_(self.classifier_linear.weight)
         self.Var_w = Variable(torch.ones(1, 1), requires_grad=True)
     def forward(self,x, prev_error):
-        x = self.classifier_linear(x) +  self.Var_w * prev_error 
+        x = self.classifier_linear(x) + self.Var_w * prev_error 
         
         return x
     
@@ -215,6 +217,7 @@ class opcbackprop:
             return yhat[0]
              
     def update(self,x,y):
+        self.model.zero_grad()
         y = torch.from_numpy(y.reshape(1,1))
         pred = self.predict(x, detach=False)
         loss = self.criterion(pred,y)

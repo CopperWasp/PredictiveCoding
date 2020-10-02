@@ -10,16 +10,17 @@ model_type = 'opc'
 num_layers = 3
 cov_strength = 0.5
 
-scenarios = {'full': dl.simulate_nothing,
+scenarios = {#'full': dl.simulate_nothing,
              'varying_gaussian': dl.simulate_varying,
              'varying_uniform': dl.simulate_random_varying}
 
 
 
-datasets = ['a8a', 'german', 'ionosphere', 'spambase', 'magic04']
+datasets = [ 'german', 'ionosphere', 'spambase', 'magic04','a8a']
 
 models = {
     'hinge_gradient': model.classifier_module,
     'se_gradient': model.error_module,
     'hinge_oco': model.oco_classifier,
-    'opc': model.opc}
+    'opc': model.opc,
+    'opcbackprop':model.opcbackprop}
