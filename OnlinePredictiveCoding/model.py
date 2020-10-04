@@ -190,7 +190,6 @@ class OPNet(nn.Module):
         for i in range (self.number_layers - 1):
             predict = self.error_modules[i](x[i], predict) 
             errors.append(torch.norm(predict - errors[-1]))
-        
             
         pred = self.classifier_module(x[-1], predict) 
         errors.append(torch.norm(pred - errors[-1]))

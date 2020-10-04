@@ -22,7 +22,7 @@ def train(X, y, model):
 
 
 
-def cross_validation(X, y, model, num_folds, scenario_function):
+def cross_validation(X, y, model, num_folds, scenario_function,cov_strength):
     fold_errors = []
     fold_losses = []
     fold_weights = []
@@ -31,7 +31,7 @@ def cross_validation(X, y, model, num_folds, scenario_function):
     for i in range(num_folds):
         X, y = shuffle(X, y)
         X_copy = copy.deepcopy(X)
-        fold_mask = scenario_function(X_copy, p.cov_strength)
+        fold_mask = scenario_function(X_copy, cov_strength)
         X_copy *= fold_mask
         fold_masks.append(fold_mask)
         model.reset()
