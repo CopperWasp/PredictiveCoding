@@ -13,7 +13,7 @@ num_layers = 3
 def quant(x, l):  # l: num_layers, x:input
     one_hot = copy.deepcopy(x)
     one_hot[one_hot != 0] = 1
-    step = (x - one_hot) / (l-1)
+    step = (x - one_hot) / float(l-1)
     x_list = []
     
     for i in range(l):  # top down
