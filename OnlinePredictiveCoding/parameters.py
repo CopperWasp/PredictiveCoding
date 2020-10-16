@@ -6,9 +6,9 @@ dataset_name = 'german'
 folds = 20
 learning_rate = 0.01
 scenario = 'varying_gaussian'
-model_type = 'opc'
+model_type = 'jeev_backprop'
 num_layers = 3
-cov_strength = 1
+cov_strength = 0.25
 
 scenarios = {'varying_gaussian': dl.simulate_varying,
              'varying_uniform': dl.simulate_random_varying,

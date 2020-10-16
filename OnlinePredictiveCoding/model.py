@@ -10,7 +10,7 @@ from torch.autograd  import Variable
 num_layers = 3
 
 
-def quant(x, l):  # l: num_layers, x:input
+def quant2(x, l):  # l: num_layers, x:input
     one_hot = copy.deepcopy(x)
     one_hot[one_hot != 0] = 1
     step = (x - one_hot) / float(l-1)
@@ -18,6 +18,18 @@ def quant(x, l):  # l: num_layers, x:input
     
     for i in range(l):  # top down
         x_list.append(one_hot + i * step)
+    
+    return x_list
+
+
+def quant(x, l):  # l: num_layers, x:input
+    one_hot = copy.deepcopy(x)
+    one_hot[one_hot != 0] = 1
+    step = (np.square(x) - one_hot / float(l-1))
+    x_list = []
+    
+    for i in range(l):  # top down
+        x_list.append((one_hot + i * step))
     
     return x_list
 
@@ -190,8 +202,8 @@ class opc_backprop(nn.Module):
 class error_module(nn.Module):
     def __init__(self,size):
         super(error_module,self).__init__()
-        self.error_linear = nn.Linear(size,1, bias=False)
-        self.Var_e = Variable(torch.ones(1, 1), requires_grad=True)
+        self.error_linear = nn.Linear(size,1, bias=True)
+        self.Var_e = 1 #Variable(torch.ones(1, 1), requires_grad=True)
     def forward(self,x,prev_error):
         x = self.error_linear(x) + self.Var_e * prev_error
         
@@ -202,8 +214,8 @@ class error_module(nn.Module):
 class classifier_module(nn.Module):
     def __init__(self,size):
         super(classifier_module,self).__init__()
-        self.classifier_linear = nn.Linear(size,1, bias=False)
-        self.Var_w = Variable(torch.ones(1, 1), requires_grad=True)
+        self.classifier_linear = nn.Linear(size,1, bias=True)
+        self.Var_w = 1 #Variable(torch.ones(1, 1), requires_grad=True)
     def forward(self,x, prev_error):
         x = self.classifier_linear(x) +  self.Var_w * prev_error 
         
