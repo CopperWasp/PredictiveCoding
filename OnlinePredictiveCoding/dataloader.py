@@ -29,7 +29,8 @@ def simulate_varying(X, cov_strength):  # multivariate normal distribution
     cov = np.dot(cov, cov.transpose())  # to have a positive semi-definite matrix
 
     # create a mean vector
-    mean = np.random.rand(len(X[0]))
+    #mean = np.random.rand(len(X[0]))
+    mean = np.zeros(len(X[0]))
 
     # sample from multivariate gaussian w/ given mean and cov
     spaces = np.random.multivariate_normal(mean, cov, len(X))
@@ -40,10 +41,86 @@ def simulate_varying(X, cov_strength):  # multivariate normal distribution
 
     return spaces
 
+
+def simulate_varying_25(X, cov_strength):  # multivariate normal distribution
+    '''Get the data and generate a varying feature space pattern.
+    Possible concerns: thresholding messing up the distribution?'''
+
+    # create a covariance matrix
+    num_features = len(X[0])
+    cov = np.random.rand(num_features, num_features) + 0.25
+    cov = np.dot(cov, cov.transpose())  # to have a positive semi-definite matrix
+
+    # create a mean vector
+    #mean = np.random.rand(len(X[0]))
+    mean = np.zeros(len(X[0]))
+
+
+    # sample from multivariate gaussian w/ given mean and cov
+    spaces = np.random.multivariate_normal(mean, cov, len(X))
+
+    # threshold samples for 1-hot encoding
+    spaces[spaces < 0] = 0
+    spaces[spaces != 0] = 1
+
+    return spaces
+
+
+
+def simulate_varying_50(X, cov_strength):  # multivariate normal distribution
+    '''Get the data and generate a varying feature space pattern.
+    Possible concerns: thresholding messing up the distribution?'''
+
+    # create a covariance matrix
+    num_features = len(X[0])
+    cov = np.random.rand(num_features, num_features) + 0.5
+    cov = np.dot(cov, cov.transpose())  # to have a positive semi-definite matrix
+
+    # create a mean vector
+    #mean = np.random.rand(len(X[0]))
+    mean = np.zeros(len(X[0]))
+
+
+    # sample from multivariate gaussian w/ given mean and cov
+    spaces = np.random.multivariate_normal(mean, cov, len(X))
+
+    # threshold samples for 1-hot encoding
+    spaces[spaces < 0] = 0
+    spaces[spaces != 0] = 1
+
+    return spaces
+
+
+def simulate_varying_75(X, cov_strength):  # multivariate normal distribution
+    '''Get the data and generate a varying feature space pattern.
+    Possible concerns: thresholding messing up the distribution?'''
+
+    # create a covariance matrix
+    num_features = len(X[0])
+    cov = np.random.rand(num_features, num_features) + 0.75
+    cov = np.dot(cov, cov.transpose())  # to have a positive semi-definite matrix
+
+    # create a mean vector
+    #mean = np.random.rand(len(X[0]))
+    mean = np.zeros(len(X[0]))
+
+
+
+    # sample from multivariate gaussian w/ given mean and cov
+    spaces = np.random.multivariate_normal(mean, cov, len(X))
+
+    # threshold samples for 1-hot encoding
+    spaces[spaces < 0] = 0
+    spaces[spaces != 0] = 1
+
+    return spaces
+
+
 def simulate_random_varying(X, cov_strength=0): # discrete uniform distribution
     matrix = np.random.randint(2, size=(len(X), len(X[0])))
     return matrix
-
+                    
+                   
 
 def simulate_nothing(X, cov_strength=0):
     return np.ones_like(X)

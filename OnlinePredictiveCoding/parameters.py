@@ -8,9 +8,12 @@ learning_rate = 0.01
 scenario = 'varying_gaussian'
 model_type = 'jeev_backprop'
 num_layers = 3
-cov_strength = 0.5
+cov_strength = 0.0
 
 scenarios = {'varying_gaussian': dl.simulate_varying,
+             'varying_gaussian +.25': dl.simulate_varying_25,
+             'varying_gaussian +.50': dl.simulate_varying_50,
+             'varying_gaussian +.75': dl.simulate_varying_75,
              'varying_uniform': dl.simulate_random_varying,
              'full': dl.simulate_nothing}
 
