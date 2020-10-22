@@ -7,18 +7,15 @@ folds = 20
 learning_rate = 0.01
 scenario = 'varying_gaussian'
 model_type = 'opc'
-num_layers = 3
-cov_strength = {'varying_gaussian + 0': 0.0,
-             'varying_gaussian + 0.25': 0.25,
+num_layers = [2,3,4]
+cov_strength = {
              'varying_gaussian + 0.5': 0.5}
 
-scenarios = {'varying_gaussian + 0': dl.simulate_varying,
-             'varying_gaussian + 0.25': dl.simulate_varying,
-             'varying_gaussian + 0.5': dl.simulate_varying}
+scenarios = {'varying_gaussian + 0.5': dl.simulate_varying}
 
 
 
-datasets = [ 'german', 'ionosphere', 'spambase', 'magic04','a8a']
+datasets = [ 'german', 'ionosphere', 'spambase','svmguide3','wpbc','wdbc','magic04','a8a']
 
 models = {
     'hinge_gradient': model.classifier_module,

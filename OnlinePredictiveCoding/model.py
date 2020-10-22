@@ -9,10 +9,10 @@ import torch.optim as optim
 import torch
 
 
-num_layers = 3
+#num_layers = 3
 
 
-def quant(x, l):  # l: num_layers, x:input
+def quant2(x, l):  # l: num_layers, x:input
     one_hot = copy.deepcopy(x)
     one_hot[one_hot != 0] = 1
     step = (x - one_hot) / (l-1)
@@ -23,6 +23,17 @@ def quant(x, l):  # l: num_layers, x:input
     
     return x_list
 
+
+def quant(x, l):  # l: num_layers, x:input
+    one_hot = copy.deepcopy(x)
+    one_hot[one_hot != 0] = 1
+    step = (np.square(x) - one_hot / float(l-1))
+    x_list = []
+    
+    for i in range(l):  # top down
+        x_list.append((one_hot + i * step))
+    
+    return x_list
 
 class error_module:
     def __init__(self, size, lr):
@@ -84,7 +95,7 @@ class oco_classifier:
         
 # predictive coding model trial
 class opc:
-    def __init__(self, in_size, lr):
+    def __init__(self, in_size, lr , num_layers):
         self.in_size = in_size
         self.num_layers = num_layers
         self.w = []
@@ -197,7 +208,7 @@ class OPNet(nn.Module):
         return pred, errors
 
 class opcbackprop:
-    def __init__(self,in_size,lr):
+    def __init__(self,in_size,lr,num_layers):
         self.in_size = in_size
         self.number_layers = num_layers
         self.lr = lr
@@ -227,6 +238,6 @@ class opcbackprop:
         return loss
             
     def reset(self):
-        self.model = OPNet(num_layers,self.in_size).to(torch.double)
+        self.model = OPNet(self.number_layers,self.in_size).to(torch.double)
         self.optim = optim.SGD(self.model.parameters(), lr=self.lr)
 
