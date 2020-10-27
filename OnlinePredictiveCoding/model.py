@@ -75,7 +75,7 @@ class classifier_module:
 
 
 class oco_classifier:
-    def __init__(self, size, C):
+    def __init__(self, size, C, num_layers):
         self.size = size
         self.w = np.zeros(size)
         self.C = C

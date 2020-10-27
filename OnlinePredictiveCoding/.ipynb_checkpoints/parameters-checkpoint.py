@@ -7,7 +7,7 @@ folds = 20
 learning_rate = 0.01
 scenario = 'varying_gaussian'
 model_type = 'opc'
-num_layers = 3
+num_layers = [3]
 cov_strength = {
              'varying_gaussian + 0.5': 0.5}
 
