@@ -8,6 +8,11 @@ from torch.autograd  import Variable
 
 
 
+
+def sigmoid(x, c):
+    return 1 / (1 + np.exp(-x * c))
+
+
 def quant2(x, l):  # l: num_layers, x:input
     one_hot = copy.deepcopy(x)
     one_hot[one_hot != 0] = 1
@@ -29,8 +34,13 @@ def quant(x, l):  # l: num_layers, x:input
     for i in range(l):  # top down
         if i == l-1:
             x_list.append(x)
+        elif i == 0:
+            x_list.append(one_hot)
         else:
-            x_list.append((one_hot + i * step))
+            quant = x - i * step
+            x[x<0] = 0
+            x[x>1] = 1
+            x_list.append(((quant)))
     
     return x_list
 
